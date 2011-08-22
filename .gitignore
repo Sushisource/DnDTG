@@ -1,0 +1,42 @@
+#ignore thumbnails created by windows
+Thumbs.db
+#Vim Swapfiles
+*.swp
+#More VS crap
+*.sln
+ipch/*
+*.pak
+*.opensdf
+*.sdf
+*.vcxproj
+*.vcxproj.filters
+#Ignore files build by Visual Studio
+*.obj
+*.exe
+*.pdb
+*.user
+*.aps
+*.pch
+*.vspscc
+*_i.c
+*_p.c
+*.ncb
+*.suo
+*.tlb
+*.tlh
+*.bak
+*.cache
+*.ilk
+*.log
+[Bb]in
+[Dd]ebug*/
+*.lib
+*.sbr
+obj/
+[Rr]elease*/
+_ReSharper*/
+[Tt]est[Rr]esult*
+#Specific to this
+DnDTerrain/data
+!DnDTerrain/qvoronoi.exe
+*.dll
