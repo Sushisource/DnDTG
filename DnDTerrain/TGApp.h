@@ -17,13 +17,15 @@ private:
 	PhysicsScreen *screen;
 	ScreenLabel *title;
 	WorldMaker *world;
-	vector<ScreenShape*> polOver;
-	vector<ScreenShape*> ptOver;
+	vector<ScreenEntity*> polOver; //Regions
+	vector<ScreenEntity*> ptOver; //Points
+	vector<ScreenEntity*> rvOver; //Rivers
 	bool worldInit;
 	ScreenEntity* mouseShape;
 
 	void pointOverlay();	
 	void polygonOverlay();
+	void riverOverlay();
 	ScreenEntity* getPolygonAt(int mx, int my);
-	void overlayOff(vector<ScreenShape *> &shapeVec);		
+	void overlayOff(vector<ScreenEntity*> &shapeVec);		
 };

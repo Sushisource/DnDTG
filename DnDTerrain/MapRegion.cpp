@@ -46,15 +46,21 @@ mPoint MapRegion::getCentroid()
 	if(centerCalced)
 		return center;
 	mPoint centroid = mPoint(0,0);
-	for each(mPoint p in verticies)
+	for_each(verticies.begin(), verticies.end(), [&] (mPoint p)
 	{		
 		centroid = centroid + p;
-	}
+	});
 	centroid = centroid * (1.0f/verticies.size());
 	center = centroid;
 	centerCalced = true;
 	closeToEdge();
 	return centroid;
+}
+
+Vector2* MapRegion::getLocation()
+{
+	mPoint c = getCentroid();
+	return c.asVec();
 }
 
 void MapRegion::addVert(mPoint p)
@@ -63,6 +69,16 @@ void MapRegion::addVert(mPoint p)
 	p.y = clamp(p.y,-YSIZ,YSIZ);
 	verticies.push_back(p);
 	centerCalced = false;
+}
+
+void MapRegion::addNeighbor(int i)
+{
+	neighbors.push_back(i);
+}
+
+void MapRegion::addRiver(int i)
+{
+	rivers.push_back(i);
 }
 
 vector<mPoint> MapRegion::sortedPoints()

@@ -33,7 +33,7 @@ WorldMaker::WorldMaker(unsigned long worldSeed)
 	rng.seed(seed);
 	perlGen = new Perlin(8,30,1,seed);
 	regions = unordered_map<int, MapRegion*>();
-	setupInitialPointGrid();
+	rivers = unordered_map<pair<int,int>, mRiver*>();
 }
 
 //Just a slightly randomized uniform grid
@@ -52,15 +52,16 @@ void WorldMaker::setupInitialPointGrid()
 //Main method for generating overworld
 void WorldMaker::generateLevelOne()
 {	
+	setupInitialPointGrid();
 	//First we generate the data file holding the points
 	int numpts = points.size();		
 	ofstream input("data", ios::out, ios::binary);	
 	input << "2\n";
 	input << numpts << "\n";
-	for each(mPoint p in points)
+	for_each(points.begin(), points.end(), [&] (mPoint p)
 	{						
 		input << p.x << " " << p.y << "\n";
-	}
+	});
 	input.close();
 	stringstream cmd;
 	cmd << "qvoronoi.exe s o Fv < data";	
@@ -148,18 +149,45 @@ void WorldMaker::runRain(int iterations)
 	for_each(regions.begin(), regions.end(), [&] (pair<int,MapRegion*> pr)
 	{
 		MapRegion* r = pr.second;
-		//For each neighbor
-		for_each(r->neighbors.begin(), r->neighbors.end(), [&](int rk)
-		{
-			float toel = regions[rk]->rainLevel;
-			float fromel = r->rainLevel;
-			if(regions.count(rk) > 0 && fromel > 0 && regions[rk]->elevation < r->elevation)
+		float fromel = r->rainLevel;
+		if(!r->edge && !r->ocean && fromel > 0)
+		{			
+			int lowestN = pr.first; //The first lowest is the region itself
+			//For each neighbor
+			for_each(r->neighbors.begin(), r->neighbors.end(), [&](int rk)
 			{
-				float rainshift = r->rainLevel * toel/fromel;
-				regions[rk]->rainLevel += rainshift;
-				r->rainLevel -= rainshift;
+				//Find the lowest one
+				if(regions.count(rk) > 0)
+				{				
+					MapRegion* ro = regions[rk];
+					if(ro->elevation < r->elevation)
+					{
+						if(lowestN != -1)
+							lowestN = (ro->elevation < regions[lowestN]->elevation) ? rk : lowestN;
+						else
+							lowestN = rk;
+					}
+				}				
+			});						
+			float rainshift = fromel/2.0f;
+			//TODO: Parameterize river threshold
+			if (rainshift > .2 && lowestN != pr.first) //Make sure we actually found a lowest
+			{
+				pair<int, int> fromto = pair<int,int>(pr.first,lowestN);
+				if(rivers.count(fromto) > 0)
+				{
+					//River already exists
+					rivers[fromto]->strength += rainshift;
+				}
+				else
+				{
+					//New river
+					rivers[fromto] = new mRiver(rainshift);
+				}
 			}
-		});	
+			regions[lowestN]->rainLevel += rainshift;
+			r->rainLevel -= rainshift;		
+		}
 	});
 	if(iterations > 0)
 		runRain(iterations - 1);
@@ -223,9 +251,9 @@ void WorldMaker::setupRegions(string &output)
 		int s2index = atoi(bits[2].data());
 		//Add each other to neighbor lists
 		if(regions.count(s1index) > 0)			
-			regions[s1index]->neighbors.push_back(s2index);
+			regions[s1index]->addNeighbor(s2index);
 		if(regions.count(s2index) > 0)
-			regions[s2index]->neighbors.push_back(s1index);
+			regions[s2index]->addNeighbor(s1index);
 	}
 }
 

@@ -28,12 +28,7 @@ void TGApp::randomWorld()
 	world->generateLevelOne();	
 	worldInit = true;	
 	polygonOverlay();	
-	/*MapRegion *r = world->regions[100];
-    for_each(r->neighbors.begin(), r->neighbors.end(), [&] (int rk)
-	{
-		world->regions[rk]->myShape->setColor(1,0,0,1);
-	});*/
-	//pointOverlay();	
+	riverOverlay();
 }
 
 //Handle events
@@ -63,13 +58,13 @@ void TGApp::handleEvent(Event *e) {
 void TGApp::pointOverlay()
 {
 	vector<mPoint> pts = world->points;	
-	for each(mPoint p in pts)
+	for_each(pts.begin(), pts.end(), [&] (mPoint p)
 	{
 		ScreenShape *s = new ScreenShape(ScreenShape::SHAPE_CIRCLE,5,5,3);
 		s->setPosition(p.x,p.y);		
 		ptOver.push_back(s);
 		screen->addChild(s);
-	}
+	});
 }
 
 void TGApp::polygonOverlay()
@@ -84,13 +79,14 @@ void TGApp::polygonOverlay()
 			mPoint c = r->getCentroid();
 			ScreenShape *s = new ScreenShape(ScreenShape::SHAPE_CUSTOM);
 			s->setPosition(c.x ,c.y);
-			for each(mPoint v in pizzoints)
+			for_each(pizzoints.begin(), pizzoints.end(), [&] (mPoint v)
 			{
 				s->addShapePoint(v.x - c.x,v.y - c.y);
-			}								
+			});						
 			if(r->ocean)
 				s->setColor(r->elevation/2,r->elevation/2,r->elevation,1);
-			else if(r->rainLevel > .1)
+			//TODO: Parameterize essentialy this "lake threshold"
+			else if(r->rainLevel > .2)
 				s->setColor(r->elevation/1.5f,r->elevation/1.5f,r->elevation,1);
 			else
 				s->setColor(r->elevation,r->elevation,r->elevation,1);			
@@ -105,14 +101,28 @@ void TGApp::polygonOverlay()
 	});
 }
 
-//Give it a vec of shapes, turns them off.
-void TGApp::overlayOff(vector<ScreenShape *> &shapeVec)
+void TGApp::riverOverlay()
 {
-	for each(ScreenShape *s in shapeVec)
+	for_each(world->rivers.begin(), world->rivers.end(), [&] (pair<pair<int,int>, mRiver*> pr)
+	{
+		MapRegion* r1 = world->regions[pr.first.first];
+		MapRegion* r2 = world->regions[pr.first.second];
+		ScreenLine* s = new ScreenLine(r1->getLocation(), r2->getLocation());
+		s->setLineWidth(3);
+		s->setColor(.1,0.,1,1);
+		rvOver.push_back(s);
+		screen->addChild(s);
+	});
+}
+
+//Give it a vec of screen entities, turns them off.
+void TGApp::overlayOff(vector<ScreenEntity*> &shapeVec)
+{
+	for_each(shapeVec.begin(), shapeVec.end(), [&] (ScreenEntity *s)
 	{
 		screen->removeChild(s);
 		delete s;
-	}
+	});
 	shapeVec.erase(shapeVec.begin(), shapeVec.end());
 }
 

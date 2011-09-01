@@ -11,8 +11,10 @@ public:
 	void generateLevelOne();
 	//vector of points for voronoi generation
 	vector<mPoint> points;
-	//vector of polygons for last overlay
+	//regions, indexed by order of appearance in qvoronoi output
 	unordered_map<int, MapRegion*> regions;
+	//Rivers
+	unordered_map<pair<int,int>, mRiver*> rivers;
 
 private:
 	Perlin *perlGen;

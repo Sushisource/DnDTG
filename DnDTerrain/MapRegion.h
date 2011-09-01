@@ -11,10 +11,14 @@ public:
 	void addVert(mPoint p);
 	void setElevation(float e);
 	bool containsPoint(mPoint p);
+	void addNeighbor(int i);
+	void addRiver(int i);
+	Vector2* getLocation();
 
 	float elevation;
 	float rainLevel;
 	vector<int> neighbors; //List of keys to other neigbor regions
+	vector<int> rivers; //List of connected rivers by their index
 	mPoint location; //Represents the polygon's "true" location
 	mPoint* asPoint; //Pointer to the point associated w/ region
 	ScreenShape* myShape; //On-screen representation

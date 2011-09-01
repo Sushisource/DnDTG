@@ -9,6 +9,7 @@
 #include <algorithm>
 #include <boost/algorithm/string.hpp>
 #include <boost/lexical_cast.hpp>
+#include <boost/functional/hash.hpp>
 #include <random>
 #include <iostream>
 #include <sstream>
@@ -26,7 +27,15 @@ inline float clamp(float x, float a, float b)
 {
 	return x < a ? a : (x > b ? b : x);
 }
-
+//River structure
+struct mRiver
+{
+	int strength;
+	mRiver::mRiver(int str)
+	{
+		strength = str;
+	}
+};
 //Point structure
 struct mPoint
 {
@@ -39,6 +48,10 @@ struct mPoint
 	float cross(mPoint &other)
 	{
 		return x*other.y-y*other.x;
+	}
+	Vector2* asVec()
+	{
+		return new Vector2(x,y);
 	}
 	mPoint operator + (const mPoint &other) const
 	{
@@ -55,6 +68,20 @@ struct mPoint
 		return false;
 	}
 };
+//So we can hash pairs
+namespace std
+{
+  template<typename S, typename T> struct hash<pair<S, T>>
+  {
+    inline size_t operator()(const pair<S, T> & v) const
+    {
+      size_t seed = 0;	  
+      boost::hash_combine(seed, v.first);
+      boost::hash_combine(seed, v.second);
+      return seed;
+    }
+  };
+}
 //Point sorter
 struct pSorter
 {
