@@ -77,27 +77,29 @@ void TGApp::polygonOverlay()
 	//We need to build the polygons from points
 	for_each(world->regions.begin(), world->regions.end(), [&] (pair<int,MapRegion*> pr)
 	{		
-		MapRegion* p = pr.second;
-		if(!p->edge)
+		MapRegion* r = pr.second;
+		if(!r->edge)
 		{
-			vector<mPoint> pizzoints = p->sortedPoints();
-			mPoint c = p->getCentroid();
+			vector<mPoint> pizzoints = r->sortedPoints();
+			mPoint c = r->getCentroid();
 			ScreenShape *s = new ScreenShape(ScreenShape::SHAPE_CUSTOM);
 			s->setPosition(c.x ,c.y);
 			for each(mPoint v in pizzoints)
 			{
 				s->addShapePoint(v.x - c.x,v.y - c.y);
 			}								
-			if(p->ocean)
-				s->setColor(p->elevation/2,p->elevation/2,p->elevation,1);
+			if(r->ocean)
+				s->setColor(r->elevation/2,r->elevation/2,r->elevation,1);
+			else if(r->rainLevel > .1)
+				s->setColor(r->elevation/1.5f,r->elevation/1.5f,r->elevation,1);
 			else
-				s->setColor(p->elevation,p->elevation,p->elevation,1);			
+				s->setColor(r->elevation,r->elevation,r->elevation,1);			
 			s->strokeEnabled = true;
 			s->setStrokeColor(1,1,0,1);
 			s->setStrokeWidth(1);
 			polOver.push_back(s);
 			screen->addChild(s);
-			p->myShape = s;
+			r->myShape = s;
 			//screen->addCollisionChild(s, PhysicsScreenEntity::ENTITY_MESH);		
 		}
 	});

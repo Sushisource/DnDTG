@@ -7,10 +7,13 @@ MapRegion::MapRegion(void)
 	centerCalced = false;
 	edge = false;
 	ocean = false;
+	rainLevel = 0;
+	elevation = 0;
 }
 
 void MapRegion::closeToEdge()
 {
+	//TODO: No magic numbers
 #define PADD 10
 	if(center.x > XSIZ/2 - PADD || center.x < -XSIZ/2 + PADD)
 		edge = true;

@@ -7,5 +7,8 @@ The user can experience the map at three levels, an overworld view, a regional v
 Currently only overworld view exists, at this point elevation and oceans are properly generated.
 
 ## Requirements 
-Polycode framework http://polycode.org/
-qvoronoi.exe http://www.qhull.org/html/qvoronoi.html
+* Polycode framework http://polycode.org/
+* qvoronoi.exe http://www.qhull.org/html/qvoronoi.html
+
+### Credit to
+Massively inspired by: http://www-cs-students.stanford.edu/~amitp/game-programming/polygon-map-generation/

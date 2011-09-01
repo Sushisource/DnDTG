@@ -13,6 +13,7 @@ public:
 	bool containsPoint(mPoint p);
 
 	float elevation;
+	float rainLevel;
 	vector<int> neighbors; //List of keys to other neigbor regions
 	mPoint location; //Represents the polygon's "true" location
 	mPoint* asPoint; //Pointer to the point associated w/ region

@@ -69,7 +69,7 @@ void WorldMaker::generateLevelOne()
 	//Done generating voronoi diagram
 	setupRegions(output);	
 	doRegionElevations(1);
-	floodWorld();
+	floodWorld();	
 }
 
 //Assigns elevations to the regions based on perlin noise
@@ -90,7 +90,8 @@ void WorldMaker::doRegionElevations(float floor)
 void WorldMaker::floodWorld()
 {
 	//First we've got to designate where initial ocean tiles are
-	//Just the edges in this simple case
+	//Just the edges in this simple case. In this step we also assign
+	//inital rain levels to non-ocean tiles
 	for_each(regions.begin(), regions.end(), [&] (pair<int,MapRegion*> pr)
 	{
 		MapRegion* r = pr.second;
@@ -104,13 +105,21 @@ void WorldMaker::floodWorld()
 				if(regions.count(rk) > 0 && !regions[rk]->edge)
 					regions[rk]->ocean = true;
 			});
-			r->ocean = false;
+			r->ocean = false;			
+		}
+		//Assign an initial rain level
+		else
+		{
+			r->rainLevel = abs(perlGen->Get(r->location.x,r->location.y));
 		}
 	});	
 
-	runOceans(15); //TODO: Parameterize
+	runOceans(15); //TODO: Parameterize these
+	runRain(35); 
 }
 
+//Runs ocean edges onto the rest of the map
+//Following lower elevations toward the center
 void WorldMaker::runOceans(int iterations)
 {
 	//For each region
@@ -129,6 +138,31 @@ void WorldMaker::runOceans(int iterations)
 	});
 	if(iterations > 0)
 		runOceans(iterations - 1);
+}
+
+//Runs the collected water over the world according
+//to elevations
+void WorldMaker::runRain(int iterations)
+{
+	//For each region
+	for_each(regions.begin(), regions.end(), [&] (pair<int,MapRegion*> pr)
+	{
+		MapRegion* r = pr.second;
+		//For each neighbor
+		for_each(r->neighbors.begin(), r->neighbors.end(), [&](int rk)
+		{
+			float toel = regions[rk]->rainLevel;
+			float fromel = r->rainLevel;
+			if(regions.count(rk) > 0 && fromel > 0 && regions[rk]->elevation < r->elevation)
+			{
+				float rainshift = r->rainLevel * toel/fromel;
+				regions[rk]->rainLevel += rainshift;
+				r->rainLevel -= rainshift;
+			}
+		});	
+	});
+	if(iterations > 0)
+		runRain(iterations - 1);
 }
 
 //Parses qvoronoi output

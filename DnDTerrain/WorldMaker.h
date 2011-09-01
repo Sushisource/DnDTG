@@ -30,5 +30,6 @@ private:
 	void doRegionElevations(float floor);
 	void floodWorld();
 	void runOceans(int iterations);
+	void runRain(int iterations);
 };
 
